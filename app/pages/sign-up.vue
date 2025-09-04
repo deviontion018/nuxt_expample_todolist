@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
 import { UInput } from '#components';
-import { authClient } from '../../utils/auth-client'
+import { authClient } from '~~/utils/auth-client'
 
 const input = ref({
         name: '',

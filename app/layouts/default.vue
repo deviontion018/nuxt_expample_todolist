@@ -36,6 +36,7 @@
 
 <script setup lang="ts">
 const { user, logout } = useUser();
+
 const toast = useToast();
 const onLogout = async () => {
     try {

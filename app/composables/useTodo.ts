@@ -21,39 +21,85 @@ export const useTodo = () => {
 
         // singleton pattern
         watch (todos, (newTodos) => {
-            const data = JSON.stringify(newTodos);
+            const offLineMode = newTodos.filter(t => !t.isOnlineMode);
+            const data = JSON.stringify(offLineMode);
             localStorage.setItem('todos', data);
         
         }, { deep: true });
     }
 
     const { user } = useUser();
-    
-
+  
     const loadTodoListFromLocalStorage = () => {
         const data = localStorage.getItem('todos');
         if (data) {
             todos.value = JSON.parse(data);
         }
     };
-    const addTodo = (todo: string) => {
-        todos.value.push({
-            id: uuid(),
-            title: todo,
-            items: [],
-            isOnlineMode: user.value !== null,
-        });
+
+    const loadTodoListFromOnline = async () => {
+        if (!user.value) {
+             return;
+        }
+         const result = await $fetch('/api/todos', {
+                method: 'GET',
+            });
+        
+            const offLineTodos = todos.value.filter(t => !t.isOnlineMode);
+            todos.value = result.data.map((t) => ({
+                id: t.id,
+                title: t.title,
+                items: t.items.map(i => ({
+                    id: i.id,
+                    title: i.title,
+                    done: i.done,
+                })),
+                isOnlineMode: true,
+            })).concat(offLineTodos);
+    };
+    const addTodo = async (todo: string) => {
+        if (user.value) {
+            // Online mode
+            // You can implement API call to create todo in the backend here
+            const resultTodo = await $fetch('/api/todos/create', {
+                method: 'POST',
+                body: { title: todo },
+            });
+            todos.value.push({
+                ...resultTodo.result,
+                items: [],
+                isOnlineMode: true,
+            });
+         
+        }else{
+            // Offline mode
+            todos.value.push({
+                id: uuid(),
+                title: todo,
+                items: [],
+                isOnlineMode: user.value !== null,
+            });
+        }
     };
 
     const removeTodo = (id: string) => {
         todos.value = todos.value.filter((todo) => todo.id !== id);
     }
 
-    const updateTodoTitle = (id: string, newTitle: string) => {
-       const todo = todos.value.find((t) => t.id === id);
-       if (todo) {
-           todo.title = newTitle;
-       }
+    const updateTodoTitle = async (id: string, newTitle: string) => {
+        if (user.value) {
+          const response =  await $fetch('/api/todos/title', {
+                method: 'PATCH',
+                body: { id, title: newTitle },
+            });
+            
+        } else {
+            
+            const todo = todos.value.find((t) => t.id === id);
+            if (todo) {
+                todo.title = newTitle;
+            }
+        }
     };  
 
     const getTodo = (id: string) => {
@@ -102,20 +148,16 @@ export const useTodo = () => {
            return;
         }
         // Call your sync API here
-        try {
-            const { message } = await $fetch('/api/todos/sync', {
+        const { message } = await $fetch('/api/todos/sync', {
                 method: 'POST',
                 body: todo,
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
-           
-            return { message };
-        } catch (error) {
-            console.error('Error syncing todo:', error);
-        }
+        todo.isOnlineMode = true; 
+        return { message };
     }
 
-    return { todos, addTodo, removeTodo , updateTodoTitle, getTodo, loadTodoListFromLocalStorage, syncTodo };
+    return { todos, addTodo, removeTodo , updateTodoTitle, getTodo, loadTodoListFromLocalStorage, syncTodo, loadTodoListFromOnline  };
 };

@@ -17,6 +17,9 @@ datasource db {
 model TodoList {
   id        String      @id @default(uuid())
   title     String
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   items  TodoListItem[]
 }
 
@@ -39,6 +42,7 @@ model User {
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
+  todoLists     TodoList[]
   
 
   @@unique([email])

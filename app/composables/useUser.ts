@@ -16,7 +16,6 @@ export const useUser = () => {
         return;
       }
       user.value = session.data.user;
-      console.log("session", session);
     } catch (error) {
       console.log("Error fetching user session:", error);
       user.value = null;
@@ -33,6 +32,7 @@ export const useUser = () => {
         
     }
     await getCurrentUser();
+    
     return data;
   };
   const logout = async () => {
