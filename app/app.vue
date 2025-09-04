@@ -15,6 +15,12 @@ if (import.meta.client) {
   const { loadTodoListFromLocalStorage } = useTodo();
   loadTodoListFromLocalStorage();
 });
+
+await callOnce(async () => {
+  const { getCurrentUser } = useUser();
+  // load user info from local storage or other persistent storage if needed
+  await getCurrentUser();
+})
   
 }
 

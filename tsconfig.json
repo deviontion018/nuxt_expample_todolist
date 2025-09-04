@@ -16,6 +16,6 @@
     }
   ],
   "compilerOptions": {
-    "types": ["@types/node", "@nuxt/schema"]
+    "types": ["@types/node", "@nuxt/schema"],
   }
 }

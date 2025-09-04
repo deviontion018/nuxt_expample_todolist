@@ -11,6 +11,13 @@
                             {{ todo.title }}
                         </span>
                         <div class="flex gap-0.5">
+                            <div class="text-xs mr-1">
+                                <span >Mode:</span>
+                                <span :class="todo.isOnlineMode ? 'text-green-500' : 'text-red-500'"> {{ todo.isOnlineMode ? 'Online' : 'Offline' }}</span>
+                            </div>
+                            <UButton  v-if="!todo.isOnlineMode && user" size="xs" color="secondary" @click="onSyncTodo(todo.id)" :loading="syncBtnLoading">
+                              Sync Now
+                            </UButton>
                             <ModalUpdateTitle header-title="Edit Todo List Title" :previous-title="todo.title" place-holder="Todo List Title" @updated="onTodoTitleUpdated(todo.id, $event)">
                                 <UButton color="secondary" size="xs">Edit</UButton>
                             </ModalUpdateTitle>
@@ -35,12 +42,15 @@
                 <FormCreateTodoList />
             </div>
         </div>
+        <pre>{{ todos }}</pre>
     </ClientOnly>
     </template>
 
 <script setup lang="ts">
 
-const { todos, updateTodoTitle, removeTodo } = useTodo()
+const { todos, updateTodoTitle, removeTodo, syncTodo } = useTodo()
+const { user } = useUser();
+const toast = useToast();
 
 const onTodoTitleUpdated = (id: string, newTitle: string) => {
     updateTodoTitle(id, newTitle);
@@ -49,6 +59,23 @@ const onTodoTitleUpdated = (id: string, newTitle: string) => {
 const onDeleteConfirmed = (id: string) => {
     removeTodo(id);
 
+};
+
+const syncBtnLoading = ref(false);
+const onSyncTodo = async (id: string) => {
+    // Implement sync logic here
+    syncBtnLoading.value = true;
+    try {
+       const respone = await syncTodo(id);
+         if (respone) {
+            toast.add({title: 'Sync successful!', color: 'success',duration: 3000});
+         }
+        
+    } catch (error) {
+        toast.add({title: (error as Error)?.message || 'Error during sync', color: 'error',duration: 3000});
+       
+    }
+    syncBtnLoading.value = false;
 };
 
 </script>

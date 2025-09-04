@@ -4,12 +4,14 @@ export interface TodoItem {
     id: string;
     title: string;
     done: boolean;
+   
 }
 
 export interface TodoList {
     id: string;
     title: string;
     items: TodoItem[];
+    isOnlineMode: boolean;
 }
 let todos: Ref<TodoList[]>;
 
@@ -24,6 +26,8 @@ export const useTodo = () => {
         
         }, { deep: true });
     }
+
+    const { user } = useUser();
     
 
     const loadTodoListFromLocalStorage = () => {
@@ -37,6 +41,7 @@ export const useTodo = () => {
             id: uuid(),
             title: todo,
             items: [],
+            isOnlineMode: user.value !== null,
         });
     };
 
@@ -91,6 +96,26 @@ export const useTodo = () => {
 
         return { todo, addItem , updateItemTitle, removeItem, markItemAsDone, markItemAsUndone };
     }
+    const syncTodo = async (id: string) => {
+        const { todo } = getTodo(id);
+        if (todo.isOnlineMode) {
+           return;
+        }
+        // Call your sync API here
+        try {
+            const { message } = await $fetch('/api/todos/sync', {
+                method: 'POST',
+                body: todo,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+           
+            return { message };
+        } catch (error) {
+            console.error('Error syncing todo:', error);
+        }
+    }
 
-    return { todos, addTodo, removeTodo , updateTodoTitle, getTodo, loadTodoListFromLocalStorage };
+    return { todos, addTodo, removeTodo , updateTodoTitle, getTodo, loadTodoListFromLocalStorage, syncTodo };
 };
