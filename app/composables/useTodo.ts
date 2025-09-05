@@ -27,7 +27,7 @@ export const useTodo = () => {
         
         }, { deep: true });
     }
-
+    const { start, finish }  = useLoadingIndicator();
     const { user } = useUser();
   
     const loadTodoListFromLocalStorage = () => {
@@ -41,9 +41,11 @@ export const useTodo = () => {
         if (!user.value) {
              return;
         }
+            start();
          const result = await $fetch('/api/todos', {
                 method: 'GET',
             });
+            finish();
         
             const offLineTodos = todos.value.filter(t => !t.isOnlineMode);
             todos.value = result.data.map((t) => ({
@@ -65,10 +67,12 @@ export const useTodo = () => {
         if (user.value) {
             // Online mode
             // You can implement API call to create todo in the backend here
+            start();
             const resultTodo = await $fetch('/api/todos/create', {
                 method: 'POST',
                 body: { title: todo },
             });
+            finish();
             todos.value.push({
                 ...resultTodo.result,
                 items: [],
@@ -92,10 +96,12 @@ export const useTodo = () => {
                 return;
             }
         if (user.value && todo.isOnlineMode) {
+            start();
             await $fetch('/api/todos', {
                 method: 'DELETE',
                 body: { id },
             });
+            finish();
         }
         todos.value = todos.value.filter((todo) => todo.id !== id);
     }
@@ -106,10 +112,12 @@ export const useTodo = () => {
                 return;
             }
         if (user.value && todo.isOnlineMode) {
+            start();
           await $fetch('/api/todos/title', {
                 method: 'PATCH',
                 body: { id, title: newTitle },
             });
+            finish();
             
         } 
          todo.title = newTitle;
@@ -124,10 +132,12 @@ export const useTodo = () => {
         }
         const addItem = async (title: string) => {
             if (user.value && todo.isOnlineMode) {
+                start();
                 const { result } = await $fetch('/api/todos/items', {
                     method: 'POST', 
                     body: { todoListId: id, title },
                 });
+                finish();
                 todo.items.push({
                     id: result.id,
                     title: result.title,
@@ -151,10 +161,12 @@ export const useTodo = () => {
                 return;
             }
             if (user.value && todo.isOnlineMode) {
+                start();
                 await $fetch('/api/todos/items/title', {
                     method: 'PATCH',
                     body: { todoListItemId: itemId, title: newTitle },
                 });
+                finish();
             }
             item.title = newTitle;
         }
@@ -166,10 +178,12 @@ export const useTodo = () => {
                return;
             }
             if (user.value && todo.isOnlineMode) {
+                start();
                 await $fetch('/api/todos/items/done', {
                     method: 'PATCH',
                     body: { todoListItemId: itemId, done: true },
                 });
+                finish();
             }
              item.done = true;
         }
@@ -181,10 +195,12 @@ export const useTodo = () => {
                return;
             }
             if (user.value && todo.isOnlineMode) {
+                start();
               await  $fetch('/api/todos/items/done', {
                     method: 'PATCH',
                     body: { todoListItemId: itemId, done: false },
                 });
+                finish();
             }
              item.done = false;
         }
@@ -196,10 +212,12 @@ export const useTodo = () => {
                return;
             }
             if (user.value && todo.isOnlineMode) {
+                start();
                await $fetch('/api/todos/items', {
                     method: 'DELETE',
                     body: { todoListItemId: itemId },
                 });
+                finish();
             }
             todo.items = todo.items.filter((i) => i.id !== itemId);
         }
@@ -212,6 +230,7 @@ export const useTodo = () => {
            return;
         }
         // Call your sync API here
+        start();
         const { message } = await $fetch('/api/todos/sync', {
                 method: 'POST',
                 body: todo,
@@ -219,6 +238,7 @@ export const useTodo = () => {
                     'Content-Type': 'application/json',
                 },
             });
+        finish();
         todo.isOnlineMode = true; 
         return { message };
     }
