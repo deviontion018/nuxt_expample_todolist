@@ -32,6 +32,8 @@ export const useUser = () => {
         
     }
     await getCurrentUser();
+    const { loadTodoListFromOnline } = useTodo();
+    await loadTodoListFromOnline();
     
     return data;
   };
@@ -42,6 +44,8 @@ export const useUser = () => {
       throw new Error(error.message || 'Error during logout');
     }
     user.value = null;
+    const { clearTodoListOnline } = useTodo();
+    clearTodoListOnline();
    await navigateTo('/login');
   };
 

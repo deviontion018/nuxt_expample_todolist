@@ -1,8 +1,7 @@
 import { z } from 'zod';
 
 const schema = z.object({
-    id: z.string().min(1),
-    title: z.string().min(1).max(255),
+    id: z.string()
 });
 
 export default defineEventHandler(async (event) => {
@@ -15,10 +14,9 @@ export default defineEventHandler(async (event) => {
     if (parsed.error) {
         throw createError({ statusCode: 400, statusMessage: 'Invalid request body', data: parsed.error });
     }
-    const { id, title } = parsed.data;
-    const result = await prisma.todoList.update({
+    const { id } = parsed.data;
+    const result = await prisma.todoList.delete({
         where: { id, userId: user.id },
-        data: { title },
     });
     return  { result };
-    })
+});

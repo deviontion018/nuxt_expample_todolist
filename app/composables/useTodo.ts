@@ -57,6 +57,10 @@ export const useTodo = () => {
                 isOnlineMode: true,
             })).concat(offLineTodos);
     };
+
+    const clearTodoListOnline = () => {
+        todos.value = todos.value.filter(t => !t.isOnlineMode);
+    }
     const addTodo = async (todo: string) => {
         if (user.value) {
             // Online mode
@@ -82,24 +86,35 @@ export const useTodo = () => {
         }
     };
 
-    const removeTodo = (id: string) => {
+    const removeTodo = async (id: string) => {
+            const todo = todos.value.find((t) => t.id === id);
+            if (!todo) {
+                return;
+            }
+        if (user.value && todo.isOnlineMode) {
+            await $fetch('/api/todos', {
+                method: 'DELETE',
+                body: { id },
+            });
+        }
         todos.value = todos.value.filter((todo) => todo.id !== id);
     }
 
     const updateTodoTitle = async (id: string, newTitle: string) => {
-        if (user.value) {
-          const response =  await $fetch('/api/todos/title', {
+          const todo = todos.value.find((t) => t.id === id);
+            if (!todo) {
+                return;
+            }
+        if (user.value && todo.isOnlineMode) {
+          await $fetch('/api/todos/title', {
                 method: 'PATCH',
                 body: { id, title: newTitle },
             });
             
-        } else {
-            
-            const todo = todos.value.find((t) => t.id === id);
-            if (todo) {
-                todo.title = newTitle;
-            }
-        }
+        } 
+         todo.title = newTitle;
+          
+        
     };  
 
     const getTodo = (id: string) => {
@@ -107,36 +122,85 @@ export const useTodo = () => {
         if (!todo) {
             throw new Error(`Todo with id ${id} not found`);
         }
-        const addItem = (title: string) => {
-            todo.items.push({
-                id: uuid(),
-                title,
-                done: false,
-            });
-        }
-
-        const updateItemTitle = (itemId: string, newTitle: string) => {
-            const item = todo.items.find((i) => i.id === itemId);
-            if (item) {
-                item.title = newTitle;
+        const addItem = async (title: string) => {
+            if (user.value && todo.isOnlineMode) {
+                const { result } = await $fetch('/api/todos/items', {
+                    method: 'POST', 
+                    body: { todoListId: id, title },
+                });
+                todo.items.push({
+                    id: result.id,
+                    title: result.title,
+                    done: result.done,
+                });
+                
+            }else{
+                // Offline mode
+                todo.items.push({
+                    id: uuid(),
+                    title,
+                    done: false,
+                });
             }
         }
 
-        const markItemAsDone = (itemId: string) => {
+        const updateItemTitle = async (itemId: string, newTitle: string) => {
+            // Find the item
             const item = todo.items.find((i) => i.id === itemId);
-            if (item) {
-                item.done = true;
+            if (!item) {
+                return;
             }
+            if (user.value && todo.isOnlineMode) {
+                await $fetch('/api/todos/items/title', {
+                    method: 'PATCH',
+                    body: { todoListItemId: itemId, title: newTitle },
+                });
+            }
+            item.title = newTitle;
         }
 
-        const markItemAsUndone = (itemId: string) => {
+        const markItemAsDone = async (itemId: string) => {
+            // Find the item
             const item = todo.items.find((i) => i.id === itemId);
-            if (item) {
-                item.done = false;
+            if (!item) {
+               return;
             }
+            if (user.value && todo.isOnlineMode) {
+                await $fetch('/api/todos/items/done', {
+                    method: 'PATCH',
+                    body: { todoListItemId: itemId, done: true },
+                });
+            }
+             item.done = true;
         }
 
-        const removeItem = (itemId: string) => {
+        const markItemAsUndone = async (itemId: string) => {
+            // Find the item
+            const item = todo.items.find((i) => i.id === itemId);
+            if (!item) {
+               return;
+            }
+            if (user.value && todo.isOnlineMode) {
+              await  $fetch('/api/todos/items/done', {
+                    method: 'PATCH',
+                    body: { todoListItemId: itemId, done: false },
+                });
+            }
+             item.done = false;
+        }
+
+        const removeItem = async (itemId: string) => {
+            // Find the item
+            const item = todo.items.find((i) => i.id === itemId);
+            if (!item) {
+               return;
+            }
+            if (user.value && todo.isOnlineMode) {
+               await $fetch('/api/todos/items', {
+                    method: 'DELETE',
+                    body: { todoListItemId: itemId },
+                });
+            }
             todo.items = todo.items.filter((i) => i.id !== itemId);
         }
 
@@ -159,5 +223,5 @@ export const useTodo = () => {
         return { message };
     }
 
-    return { todos, addTodo, removeTodo , updateTodoTitle, getTodo, loadTodoListFromLocalStorage, syncTodo, loadTodoListFromOnline  };
+    return { todos, addTodo, removeTodo , updateTodoTitle, getTodo, loadTodoListFromLocalStorage, syncTodo, loadTodoListFromOnline, clearTodoListOnline };
 };
