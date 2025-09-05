@@ -18,7 +18,7 @@
                         <template v-else>
                             <div class="flex justify-between gap-2">
                                 <li class="font-bold text-lg">Hello, {{ user.email }}</li>
-                                <li><UButton color="secondary" @click="onLogout">Logout</UButton></li>
+                                <li><UButton color="secondary" :loading="loading" @click="onLogout">Logout</UButton></li>
                             </div>
                         </template>
                     </div>
@@ -38,7 +38,9 @@
 const { user, logout } = useUser();
 
 const toast = useToast();
+const loading = ref(false);
 const onLogout = async () => {
+    loading.value = true;
     try {
         await logout();
         toast.add({title: 'Logout successful!', color: 'success',duration: 3000});
@@ -46,6 +48,8 @@ const onLogout = async () => {
     } catch (error) {
         
         toast.add({title: (error as Error)?.message || 'Error during logout', color: 'error',duration: 3000});
+    } finally {
+        loading.value = false;
     }
 }
 

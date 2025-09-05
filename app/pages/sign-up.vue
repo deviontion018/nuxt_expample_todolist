@@ -41,6 +41,7 @@
                     <UButton
                     type="submit"
                     block
+                    :loading="loading"
                     >
                     Sign Up
                 </UButton>
@@ -62,18 +63,28 @@ const input = ref({
     });
 
 const toast = useToast();
+const loading = ref(false);
 
 const onSignUp = async () => {
     // Implement sign-up logic here
-   const { data, error } = await authClient.signUp.email({
-        ...input.value
-    });
-    if (error) {
-        toast.add({title: error.message || 'Error during sign-up', color: 'error',duration: 3000});
-       return;
-    } 
-    toast.add({title: `Sign-up successful! You can now log in with ${data.user.email}.`, color: 'success',duration: 3000});
-    await navigateTo('/login');
+    loading.value = true;
+    try {
+           const { data, error } = await authClient.signUp.email({
+                ...input.value
+            });
+            if (error) {
+                toast.add({title: error.message || 'Error during sign-up', color: 'error',duration: 3000});
+                return;
+            } 
+            toast.add({title: `Sign-up successful! You can now log in with ${data.user.email}.`, color: 'success',duration: 3000});
+            await navigateTo('/login');
+    } catch (error) {
+            toast.add({title: (error as Error)?.message || 'Error during sign-up', color: 'error',duration: 3000});
+           
+    } finally {
+        loading.value = false;
+    }
+
 };
 
 </script>
