@@ -13,17 +13,17 @@
                         <div class="flex gap-0.5">
                             <div class="text-xs mr-1">
                                 <span >Mode:</span>
-                                <span :class="todo.isOnlineMode ? 'text-green-500' : 'text-red-500'"> {{ todo.isOnlineMode ? 'Online' : 'Offline' }}</span>
+                                <span :class="todo.isOnlineMode ? 'text-green-500' : 'text-red-500'" class="font-bold pl-1"> {{ todo.isOnlineMode ? 'Online' : 'Offline' }}</span>
                             </div>
-                            <UButton  v-if="!todo.isOnlineMode && user" size="xs" color="secondary" @click="onSyncTodo(todo.id)" :loading="syncBtnLoading">
+                            <UButton  v-if="!todo.isOnlineMode && user" size="xs" color="secondary" class="cursor-pointer"  :loading="syncBtnLoading" @click="onSyncTodo(todo.id)" >
                               Sync Now
                             </UButton>
                             <ModalUpdateTitle header-title="Edit Todo List Title" :previous-title="todo.title" place-holder="Todo List Title" @updated="onTodoTitleUpdated(todo.id, $event)">
-                                <UButton color="secondary" size="xs">Edit</UButton>
+                                <UButton color="secondary" size="xs" class="cursor-pointer">Edit</UButton>
                             </ModalUpdateTitle>
                             
                             <ModalConfirm title="Are you sure to delete this todo list?" :description="`Todo list title: ${todo.title}`" confirm-color="error" @confirmed="onDeleteConfirmed(todo.id)">
-                                <UButton color="error" size="xs">Delete</UButton>
+                                <UButton color="error" size="xs" class="cursor-pointer">Delete</UButton>
                             </ModalConfirm>
                         </div>
                     </header>
@@ -42,7 +42,7 @@
                 <FormCreateTodoList />
             </div>
         </div>
-        <pre>{{ todos }}</pre>
+    
     </ClientOnly>
     </template>
 

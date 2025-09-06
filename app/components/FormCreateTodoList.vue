@@ -9,7 +9,7 @@
         required
       />
 
-      <UButton type="submit">Created</UButton>
+      <UButton type="submit" class="cursor-pointer">Created</UButton>
     </div>
   </form>
 </template>

@@ -29,6 +29,7 @@
                     type="submit"
                     block
                     :loading="loading"
+                    class="cursor-pointer"
                     >
                     Login
                 </UButton>

@@ -5,7 +5,7 @@
   :close="{
     color: 'primary',
     variant: 'outline',
-    class: 'rounded-full',
+    class: 'rounded-full cursor-pointer',
   }"
   :ui="{
     content: 'max-w-sm',

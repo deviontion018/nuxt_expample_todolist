@@ -42,6 +42,7 @@
                     type="submit"
                     block
                     :loading="loading"
+                    class="cursor-pointer"
                     >
                     Sign Up
                 </UButton>

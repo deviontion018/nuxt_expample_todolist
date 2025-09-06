@@ -12,13 +12,13 @@
                             <div class="flex justify-between gap-2">
                                 
                                 <li><NuxtLink class="font-bold text-lg text-blue-600 underline" to="/login">Login</NuxtLink></li>
-                                <li><NuxtLink class="font-bold text-lg text-blue-600 px-2 py-1 rounded-md hover:bg-blue-800" to="/sign-up">Sign Up</NuxtLink></li>
+                                <li><NuxtLink class="font-bold text-lg text-blue-600 px-2 py-1 rounded-md hover:bg-blue-300" to="/sign-up">Sign Up</NuxtLink></li>
                             </div>
                         </template>
                         <template v-else>
                             <div class="flex justify-between gap-2">
                                 <li class="font-bold text-lg">Hello, {{ user.email }}</li>
-                                <li><UButton color="secondary" :loading="loading" @click="onLogout">Logout</UButton></li>
+                                <li><UButton color="secondary"  :loading="loading" class="cursor-pointer" @click="onLogout">Logout</UButton></li>
                             </div>
                         </template>
                     </div>
@@ -44,7 +44,7 @@ const onLogout = async () => {
     try {
         await logout();
         toast.add({title: 'Logout successful!', color: 'success',duration: 3000});
-        await navigateTo('/login');
+        await navigateTo('/');
     } catch (error) {
         
         toast.add({title: (error as Error)?.message || 'Error during logout', color: 'error',duration: 3000});
